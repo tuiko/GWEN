@@ -18,6 +18,7 @@ namespace Gwen
 	{
 		class Windows
 		{
+			bool isfull;
 			public:
 
 				Windows()
@@ -25,15 +26,21 @@ namespace Gwen
 					m_Canvas = NULL;
 					m_MouseX = 0;
 					m_MouseY = 0;
+					isfull = 0;
 				}
 
-				void Initialize( Gwen::Controls::Canvas* c )
+				void Initialize( Gwen::Controls::Canvas* c, bool fullscreen = false )
 				{
 					m_Canvas = c;
+					isfull = fullscreen;
 				}
 
 				bool ProcessMessage( MSG msg )
 				{
+					POINT wpoint;
+					GetCursorPos(&wpoint);
+					if(!isfull) ScreenToClient(msg.hwnd,&wpoint);
+					
 					if ( !m_Canvas ) { return false; }
 
 					switch ( msg.message )
@@ -49,8 +56,10 @@ namespace Gwen
 
 						case WM_MOUSEMOVE:
 							{
-								int x = ( signed short ) LOWORD( msg.lParam );
-								int y = ( signed short ) HIWORD( msg.lParam );
+								//int x = ( signed short ) LOWORD( msg.lParam );
+								//int y = ( signed short ) HIWORD( msg.lParam );
+								int x = wpoint.x;
+								int y = wpoint.y;
 								int dx = x - m_MouseX;
 								int dy = y - m_MouseY;
 								m_MouseX = x;
