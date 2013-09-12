@@ -24,6 +24,12 @@ LPDIRECT3D9				g_pD3D = NULL;
 IDirect3DDevice9*		g_pD3DDevice = NULL;
 D3DPRESENT_PARAMETERS	g_D3DParams;
 
+#define SCR_X 800
+#define SCR_Y 600
+#define FULLSCREEN false
+#define WINDOW_STYLE \
+((WS_OVERLAPPEDWINDOW | WS_CAPTION | WS_SYSMENU ) &\
+~( WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CAPTION ))
 //
 // Windows bullshit to create a Window to render to.
 //
@@ -37,7 +43,18 @@ HWND CreateGameWindow( void )
 	wc.lpszClassName	= L"GWENWindow";
 	wc.hCursor			= LoadCursor( NULL, IDC_ARROW );
 	RegisterClass( &wc );
-	HWND hWindow = CreateWindowEx( ( WS_EX_APPWINDOW | WS_EX_WINDOWEDGE ) , wc.lpszClassName, L"GWEN - Direct 3D Sample", ( WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN ) & ~( WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME ), -1, -1, 1004, 650, NULL, NULL, GetModuleHandle( NULL ), NULL );
+
+	RECT R = { 0, 0, SCR_X, SCR_Y };
+	AdjustWindowRect( &R, WINDOW_STYLE, FALSE );
+
+	HWND hWindow = CreateWindowEx( ( WS_EX_APPWINDOW | WS_EX_WINDOWEDGE ) ,
+		wc.lpszClassName, L"GWEN - Direct 3D Sample",
+		FULLSCREEN ? WS_POPUP : WINDOW_STYLE,
+		-1, -1,
+		R.right - R.left, R.bottom - R.top,
+		NULL, NULL,
+		GetModuleHandle( NULL ), NULL );
+
 	ShowWindow( hWindow, SW_SHOW );
 	SetForegroundWindow( hWindow );
 	SetFocus( hWindow );
@@ -64,6 +81,7 @@ void CreateD3DDevice()
 	g_D3DParams.BackBufferHeight = ClientRect.bottom;
 	g_D3DParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 	g_D3DParams.BackBufferFormat = D3DFMT_X8R8G8B8;
+	g_D3DParams.Windowed = !FULLSCREEN;
 	//g_D3DParams.EnableAutoDepthStencil = TRUE;
 	//g_D3DParams.AutoDepthStencilFormat = D3DFMT_D24S8;
 	g_D3DParams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
@@ -115,7 +133,7 @@ int main( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nC
 	// (Processes Windows MSG's and fires input at GWEN)
 	//
 	Gwen::Input::Windows GwenInput;
-	GwenInput.Initialize( pCanvas );
+	GwenInput.Initialize( pCanvas, FULLSCREEN );
 	//
 	// Begin the main game loop
 	//
